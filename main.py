@@ -12,7 +12,7 @@ pixelThreshold = 500
 # region of interest
 roi = [[(232, 358), (850, 386), 'boxtext', 'clientID'], 
 [(498, 504), (820, 526), 'text', 'cmName'], 
-[(822, 506), (1142, 524), 'text', 'targetActNo'], 
+[(822, 506), (1142, 524), 'numtext', 'targetActNo'], 
 [(628, 716), (1144, 744), 'text', 'custID'], 
 [(244, 1028), (542, 1070), 'text', 'Name'], 
 [(246, 1078), (542, 1150), 'signtext', 'signature']]
@@ -66,7 +66,7 @@ for j,y in enumerate(myPicList):
     imgMask = np.zeros_like(imgShow)
 
     myData = []
-
+    print(f'################ Extracting data from form {j} ################')
     # iterate through roi and mark the regions with "GREEN" colour
     for x,r in enumerate(roi):
         # marking the regions
@@ -91,9 +91,16 @@ for j,y in enumerate(myPicList):
                 totalPixels = 0
             print(f"{r[3]} : {totalPixels}")
             myData.append(totalPixels)
-
+        # works in case of plain forms and fonts
+        # cv2.putText(imgShow,str(myData[x]),(r[0][0],r[0][1]),cv2.FONT_HERSHEY_PLAIN,2.5,(0,0,255),4)
+    # writing into csv file
+    with open("./dataOutput.csv","a+") as f:
+        for data in myData:
+            f.write((str(data.replace("\n",""))+","))
+        f.write("\n")
+    # print(myData)
     imgShow = cv2.resize(imgShow, (w//3,h//3))
     cv2.imshow(y+"2",imgShow)
 
-cv2.imshow("Output",imgQ)
+# cv2.imshow("Output",imgQ)
 cv2.waitKey(0)
