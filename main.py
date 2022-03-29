@@ -5,15 +5,17 @@ import os
 
 # setting tesseract path
 pytesseract.pytesseract.tesseract_cmd = "D:\\Tesseract-OCR\\tesseract.exe"
+
 per = 25
+pixelThreshold = 500
 
 # region of interest
-roi = [[(232, 358), (850, 386), 'text', 'clientID'], 
+roi = [[(232, 358), (850, 386), 'boxtext', 'clientID'], 
 [(498, 504), (820, 526), 'text', 'cmName'], 
 [(822, 506), (1142, 524), 'text', 'targetActNo'], 
 [(628, 716), (1144, 744), 'text', 'custID'], 
 [(244, 1028), (542, 1070), 'text', 'Name'], 
-[(246, 1078), (542, 1150), 'text', 'signature']]
+[(246, 1078), (542, 1150), 'signtext', 'signature']]
 
 # reading the image and resizing it for convenience
 imgQ = cv2.imread("./query-page-1.jpg")
@@ -63,6 +65,8 @@ for j,y in enumerate(myPicList):
     imgShow = imgScan.copy()
     imgMask = np.zeros_like(imgShow)
 
+    myData = []
+
     # iterate through roi and mark the regions with "GREEN" colour
     for x,r in enumerate(roi):
         # marking the regions
@@ -71,7 +75,22 @@ for j,y in enumerate(myPicList):
         imgShow = cv2.addWeighted(imgShow, 0.99, imgMask, 0.1, 0)
         # cropping the image
         imgCrop = imgScan[r[0][1]:r[1][1], r[0][0]:r[1][0]]
-        cv2.imshow(str(x),imgCrop)
+        # cv2.imshow(str(x),imgCrop)
+
+        if r[2] == "text":
+            print(f"{r[3]} : {pytesseract.image_to_string(imgCrop)}")
+            myData.append(pytesseract.image_to_string(imgCrop))
+        if r[2] == "box":
+            imgGray = cv2.cvtColor(imgCrop, cv2.COLOR_BGR2GRAY)
+            imgThreshold = cv2.threshold(imgGray,170,255, cv2.THRESH_BINARY_INV)[1]
+            # finding dark and light regions
+            totalPixels = cv2.countNonZero(imgThreshold)
+            if totalPixels > pixelThreshold:
+                totalPixels = 1
+            else:
+                totalPixels = 0
+            print(f"{r[3]} : {totalPixels}")
+            myData.append(totalPixels)
 
     imgShow = cv2.resize(imgShow, (w//3,h//3))
     cv2.imshow(y+"2",imgShow)
