@@ -52,12 +52,29 @@ for j,y in enumerate(myPicList):
     srcPoints = np.float32([kp2[m.queryIdx].pt for m in good]).reshape(-1,1,2)
     destPoints = np.float32([kp1[m.trainIdx].pt for m in good]).reshape(-1,1,2)
     
-    # parameters taken from documentation
+    # parameters taken from documentation - finding relation
     M, _ = cv2.findHomography(srcPoints,destPoints,cv2.RANSAC,5.0)
 
     imgScan = cv2.warpPerspective(img,M,(w,h))
-    imgScan = cv2.resize(imgScan, (w//3,h//3))
-    cv2.imshow(y,imgScan)
+    # imgScan = cv2.resize(imgScan, (w//3,h//3))
+    # cv2.imshow(y,imgScan)
+
+    # copying and adding mask
+    imgShow = imgScan.copy()
+    imgMask = np.zeros_like(imgShow)
+
+    # iterate through roi and mark the regions with "GREEN" colour
+    for x,r in enumerate(roi):
+        # marking the regions
+        cv2.rectangle(imgMask, (r[0][0],r[0][1]), (r[1][0],r[1][1]), (0,255,0), cv2.FILLED)
+        # combining the copy and mask to obtain the form with regions marked
+        imgShow = cv2.addWeighted(imgShow, 0.99, imgMask, 0.1, 0)
+        # cropping the image
+        imgCrop = imgScan[r[0][1]:r[1][1], r[0][0]:r[1][0]]
+        cv2.imshow(str(x),imgCrop)
+
+    imgShow = cv2.resize(imgShow, (w//3,h//3))
+    cv2.imshow(y+"2",imgShow)
 
 cv2.imshow("Output",imgQ)
 cv2.waitKey(0)
