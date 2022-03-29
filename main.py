@@ -5,7 +5,16 @@ import os
 
 # setting tesseract path
 pytesseract.pytesseract.tesseract_cmd = "D:\\Tesseract-OCR\\tesseract.exe"
-per = 25;
+per = 25
+
+# region of interest
+roi = [[(232, 358), (850, 386), 'text', 'clientID'], 
+[(498, 504), (820, 526), 'text', 'cmName'], 
+[(822, 506), (1142, 524), 'text', 'targetActNo'], 
+[(628, 716), (1144, 744), 'text', 'custID'], 
+[(244, 1028), (542, 1070), 'text', 'Name'], 
+[(246, 1078), (542, 1150), 'text', 'signature']]
+
 # reading the image and resizing it for convenience
 imgQ = cv2.imread("./query-page-1.jpg")
 h,w,c = imgQ.shape
